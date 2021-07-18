@@ -122,10 +122,11 @@ async def reminder():
 
 
 async def fetch():
+    api = os.environ['api']
     while True:
         try:
             data = requests.get(
-                f'https://clist.by:443/api/v2/contest/?start__gte={Time.time_url()}&order_by=start&username=Ksathwik03&api_key=ed6d08ae4f389746f053fb34351419e52d087227'
+                f'https://clist.by:443/api/v2/contest/?start__gte={Time.time_url()}&order_by=start&{api}'
             )
         except:
             await asyncio.sleep(60)
@@ -275,9 +276,6 @@ async def change_channel(ctx):
         if i['id'] == ctx.guild.id:
             i['channel'] = ctx.channel.id
             break
-    for channel in Remainder_data:
-        x = client.get_channel(channel['channel'])
-        print(x)
     await ctx.send('You will all reminders in this channel')
 
 
