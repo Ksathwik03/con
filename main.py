@@ -9,10 +9,6 @@ import Data_base
 import pygicord
 from pygicord import Paginator
 import os
-import dotenv
-from dotenv import load_dotenv
-
-load_dotenv()
 
 client = commands.Bot(command_prefix='%', help_command=None)
 
@@ -255,15 +251,5 @@ async def set_timezone(ctx, arg):
 		await paginator.start(ctx)
 
 
-# def hello():
-#   global Remainder_data
-#   for i in Remainder_data:
-#     channel = client.get_channel(i['channel'])
-#     print(channel)
 
-# hello()
-
-Token = os.getenv('token')
-print(Token)
-#keep_alive()
 client.run(os.environ['Token'])
