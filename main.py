@@ -266,4 +266,4 @@ async def set_timezone(ctx, arg):
 Token = os.getenv('token')
 print(Token)
 #keep_alive()
-client.run(f'{Token}')
+client.run(os.environ['Token'])
