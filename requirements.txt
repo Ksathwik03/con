@@ -2,7 +2,8 @@ discord
 discord.py
 Paginator
 pygicord
-pymongo
+dnspython
+pymongo[tls,srv]
 python-dateutil
 pytz
 replit
