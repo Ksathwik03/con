@@ -252,15 +252,5 @@ async def change_channel(ctx):
         channel = client.get_channel(636399538650742795)
         await channel.send(error)
 
-
-if __name__ == "__main__":
-    for filename in os.listdir('./cogs'):
-        if filename.endswith('.py'):
-            try:
-                client.load_extension(f'cogs.{filename[:-3]}')
-            except Exception as e:
-                print(f'Failed to load file {filename}: {str(e)}')
-                print(str(e))
-
 token = os.environ.get('Token')
 client.run(token)
