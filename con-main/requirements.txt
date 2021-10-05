@@ -1,0 +1,12 @@
+discord
+discord.py
+Paginator
+pygicord
+dnspython
+pymongo[tls,srv]
+python-dateutil
+pytz
+replit
+requests
+srv
+pymongo[srv]
