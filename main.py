@@ -262,5 +262,5 @@ if __name__ == "__main__":
                 print(f'Failed to load file {filename}: {str(e)}')
                 print(str(e))
 
-    token = os.environ.get('Token')
-    client.run(token)
+token = os.environ.get('Token')
+client.run(token)
