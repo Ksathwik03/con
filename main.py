@@ -1,4 +1,6 @@
 import asyncio
+import traceback
+
 import discord
 import requests
 import discord.ext
@@ -6,7 +8,6 @@ from discord.ext import commands
 import Time
 import main2
 import Data_base
-import pygicord
 from pygicord import Paginator
 import os
 
@@ -15,11 +16,10 @@ client = commands.Bot(command_prefix='%', help_command=None)
 text_channel_list = []
 upcoming_data = []
 default_data = [
-    'codeforces.com', 'codechef.com', 'atcoder.jp', 'hackerearth.com',
+    'codeforces.com', 'codechef.com', 'atcoder.jp',
     'codingcompetitions.withgoogle.com'
 ]
 db = Data_base.data_base()
-Remainder_data = list(db.find({}))
 supported_data = [
     'codeforces.com', 'codechef.com', 'atcoder.jp', 'hackerearth.com',
     'codingcompetitions.withgoogle.com', 'ctftime.org', 'russianaicup.ru',
@@ -42,8 +42,6 @@ async def on_command_error(ctx, error):
             'Too many arguments/n check out %help for more details on commands'
         )
     else:
-        error_db = Data_base.error_data_base()
-        error_db.insert_one({'error': error})
         f = open("errors.txt", "a")
         f.write(f'{error}')
         f.close()
@@ -78,17 +76,8 @@ async def print_statement(s):
 async def channel_list():
     global db
     for guild in client.guilds:
-        global Remainder_data, default_data
-        if len(list(db.find({'id': guild.id}))) == 0:
+        if not len(list(db.find({'id': guild.id}))):
             channel = await check(guild)
-            Remainder_data.append({
-                'id': guild.id,
-                'websites': default_data,
-                'remainder': 600,
-                'channel': channel.id,
-                'timezone': 'UTC',
-                'server': guild.name
-            })
             db.insert_one({
                 'id': guild.id,
                 'websites': default_data,
@@ -101,8 +90,8 @@ async def channel_list():
 
 async def reminder():
     global upcoming_data
-    global Remainder_data
     global db
+    Remainder_data = list(db.find({}))
     for i in upcoming_data['objects']:
         if Time.check(i):
             for channel in Remainder_data:
@@ -117,7 +106,11 @@ async def reminder():
                     channel = client.get_channel(channel['channel'])
                     try:
                         await channel.send(embed=embed)
-                    except:
+                    except Exception as error:
+                        channel = client.get_channel(636399538650742795)
+                        await channel.send(error)
+                        error_db = Data_base.error_data_base()
+                        error_db.insert_one({'error': {str(traceback.format_exc())}})
                         pass
 
 
@@ -128,8 +121,10 @@ async def fetch():
             data = requests.get(
                 f'https://clist.by:443/api/v2/contest/?start__gte={Time.time_url()}&order_by=start&{api}'
             )
-        except:
-            await asyncio.sleep(60)
+        except Exception as error:
+            error_db = Data_base.error_data_base()
+            error_db.insert_one({'error': {str(traceback.format_exc())}})
+            asyncio.sleep(60)
         global upcoming_data
         upcoming_data = data.json()
         await reminder()
@@ -154,8 +149,8 @@ async def help(ctx):
 @client.command()
 async def upcoming(ctx, arg):
     global supported_data
-    global upcoming_data, Remainder_data
-    temp = list(filter(lambda x: x['id'] == ctx.guild.id, Remainder_data))
+    global upcoming_data
+    temp = db.find_one({'id': ctx.guild.id})
     if arg == 'subscribed' or arg == '':
         temp = list(
             filter(lambda x: temp[0]['websites'].count(x['resource']) >= 1,
@@ -177,18 +172,9 @@ async def upcoming(ctx, arg):
 
 @client.event
 async def on_guild_join(guild):
-    global Remainder_data
     db.delete_one({'id': guild.id})
     channel = await check(guild)
     db.insert_one({
-        'id': guild.id,
-        'websites': default_data,
-        'remainder': 600,
-        'channel': channel.id,
-        'timezone': 'UTC',
-        'server': guild.name
-    })
-    Remainder_data.append({
         'id': guild.id,
         'websites': default_data,
         'remainder': 600,
@@ -202,48 +188,36 @@ async def on_guild_join(guild):
 
 @client.command()
 async def cur_website(ctx):
-    temp = list(filter(lambda x: x['id'] == ctx.guild.id, Remainder_data))
-    await ctx.send(embed=print_website(temp[0]['websites']))
-
-
-async def check_website(arg, ctx):
-    global supported_data
-    if supported_data.count(arg) == 0:
-        s = 'Supported websites list are \n'
-        for i in supported_data:
-            s += f'{i}\n'
-        embed = discord.Embed(title=' Website not supported',
-                              description=s,
-                              color=discord.Colour.red())
-        await ctx.send(embed=embed)
-        return 0
-    return 1
-
+    temp = db.find_one({'id': ctx.guild.id})
+    await ctx.send(embed=print_website(temp['websites']))
 
 @client.command()
 async def add_website(ctx, arg):
-    temp = list(filter(lambda x: x['id'] == ctx.guild.id, Remainder_data))
-    if temp[0]['websites'].count(arg):
-        await ctx.send(embed=print_website(temp[0]['websites']))
-        return
-    if await check_website(arg, ctx) == 0:
-        return
-    temp[0]['websites'].append(arg)
-    global db
-    db.update_one({'id': ctx.guild.id},
-                  {'$set': {
-                      'websites': temp[0]['websites']
-                  }})
-    await ctx.send(embed=print_website(temp[0]['websites']))
-
+    try:
+        if arg not in supported_data:
+            await ctx.send("Incorrect website check %supported_website for all the supported websites")
+            return
+        db.update_one({'id': ctx.guild.id}, {'$push': {'websites': arg}})
+        temp = db.find_one({'id': ctx.guild.id})
+        await ctx.send(embed=print_website(temp['websites']))
+    except Exception as error:
+        await ctx.send("Some error occured")
+        channel = client.get_channel(636399538650742795)
+        await channel.send(error)
 
 @client.command()
 async def del_website(ctx, arg):
-    temp = list(filter(lambda x: x['id'] == ctx.guild.id, Remainder_data))
-    if temp[0]['websites'].count(arg):
-        temp[0]['websites'].remove(arg)
-    await ctx.send(embed=print_website(temp[0]['websites']))
-
+    try:
+        if arg not in supported_data:
+            return
+        db.update_one({'id': ctx.guild.id}, {'$pull': {'websites': arg}})
+        temp = db.find_one({'id':ctx.guild.id})
+        await ctx.send(embed=print_website(temp['websites']))
+    except Exception as error:
+        await ctx.send("Some error occured")
+        print(error)
+        channel = client.get_channel(636399538650742795)
+        await channel.send(error)
 
 @client.command()
 async def supported_website(ctx):
@@ -270,13 +244,23 @@ async def set_timezone(ctx, arg):
 
 @client.command()
 async def change_channel(ctx):
-    db.update_one({'id': ctx.guild.id}, {'$set': {'channel': ctx.channel.id}})
-    global Remainder_data
-    for i in Remainder_data:
-        if i['id'] == ctx.guild.id:
-            i['channel'] = ctx.channel.id
-            break
-    await ctx.send('You will all reminders in this channel')
+    try:
+        db.update_one({'id': ctx.guild.id}, {'$set': {'channel': ctx.channel.id}})
+        await ctx.send('You will all reminders in this channel')
+    except Exception as error:
+        await ctx.send("Some error occured")
+        channel = client.get_channel(636399538650742795)
+        await channel.send(error)
 
 
-client.run(os.environ['Token'])
+if __name__ == "__main__":
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            try:
+                client.load_extension(f'cogs.{filename[:-3]}')
+            except Exception as e:
+                print(f'Failed to load file {filename}: {str(e)}')
+                print(str(e))
+
+    token = os.environ.get('Token')
+    client.run(token)
