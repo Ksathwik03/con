@@ -73,11 +73,13 @@ def help_description():
                   'Example - %add_website codeforces.com \n adds codeforces to your subscribed websites\n' \
                   '6) **%del_website <url of website>** - Deletes subscription of this website \n' \
                   'Example - %del_website codeforces.com \n deletes codeforces from your subscribed websites \n' \
-                  '7) **%supported_website** - Shows all the supported websites \n'
+                  '7) **%supported_website** - Shows all the supported websites \n' \
+                  '8) **%change_channel** - Recieve further updates in that channel \n' \
+                  '9) **%subscribe** - Adds Contest Remainder role to recive remainders mentions\n' \
+                  '10) **%unsubscribe** - Removes Contest Remainder role \n'
     embed.add_field(name="List of commands", value=description, inline=False)
     embed.add_field(name="Note",
-                    value='All the <url of website> are listed in the command %supported_websites incorrect ' \
-                          'format may not give the desired results ',
+                    value='Like the project star the [repo](https://github.com/Ksathwik03/contest_remainder) ✌',
                     inline=False)
     embed.add_field(name="Contribute", value="[github link](https://github.com/Ksathwik03/contest_remainder)",
                     inline=True)

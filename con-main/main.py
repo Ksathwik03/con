@@ -88,6 +88,22 @@ async def channel_list():
             })
 
 
+async def roles(id=0):
+    try:
+        if id:
+            guild = client.get_guild(id)
+            await guild.create_role(name="Contest Remainder")
+            return
+        Remainder_data = list(db.find({}))
+        for data in Remainder_data:
+            guild = client.get_guild(data['id'])
+            if discord.utils.get(guild.roles, name="Contest Remainnder"):
+                continue
+            await guild.create_role(name="Contest Remainder", colour=discord.Colour(0xff0000))
+    except:
+        pass
+
+
 async def reminder():
     global upcoming_data
     global db
@@ -97,6 +113,8 @@ async def reminder():
             for channel in Remainder_data:
                 event = i['event']
                 url = i['href']
+                guild = client.get_guild(channel['id'])
+                moderator = discord.utils.get(guild.roles, name="Contest Remainder")
                 embed = discord.Embed(
                     title=' Reminder!!',
                     description=
@@ -106,6 +124,8 @@ async def reminder():
                     channel = client.get_channel(channel['channel'])
                     try:
                         await channel.send(embed=embed)
+                        if moderator:
+                            await channel.send(f'{moderator.mention}')
                     except Exception as error:
                         channel = client.get_channel(895030489121980416)
                         await channel.send(error)
@@ -131,11 +151,26 @@ async def fetch():
         await asyncio.sleep(180)
 
 
+@client.command()
+async def subscribe(ctx):
+    role = discord.utils.get(ctx.guild.roles, name="Contest Remainder")
+    user = ctx.message.author
+    await user.add_roles(role)
+
+
+@client.command()
+async def unsubscribe(ctx):
+    role = discord.utils.get(ctx.guild.roles, name="Contest Remainder")
+    user = ctx.message.author
+    await user.remove_roles(role)
+
+
 @client.event
 async def on_ready():
     print("Bot is ready")
     await client.change_presence(activity=discord.Game(
         name="Responding to %help"))
+    await roles();
     await channel_list()
     await fetch()
 
@@ -152,7 +187,7 @@ async def upcoming(ctx, arg):
     global upcoming_data
     temp = db.find_one({'id': ctx.guild.id})
     if arg == 'subscribed' or arg == '':
-        temp = list(filter(lambda x: temp['websites'].count(x['resource']) >= 1,upcoming_data['objects']))
+        temp = list(filter(lambda x: temp['websites'].count(x['resource']) >= 1, upcoming_data['objects']))
     elif arg == 'all':
         temp = upcoming_data['objects']
     else:
@@ -182,12 +217,14 @@ async def on_guild_join(guild):
     })
     embed = main2.help_description()
     await channel.send(embed=embed)
+    await roles(id=guild.id)
 
 
 @client.command()
 async def cur_website(ctx):
     temp = db.find_one({'id': ctx.guild.id})
     await ctx.send(embed=print_website(temp['websites']))
+
 
 @client.command()
 async def add_website(ctx, arg):
@@ -203,19 +240,21 @@ async def add_website(ctx, arg):
         channel = client.get_channel(895030489121980416)
         await channel.send(error)
 
+
 @client.command()
 async def del_website(ctx, arg):
     try:
         if arg not in supported_data:
             return
         db.update_one({'id': ctx.guild.id}, {'$pull': {'websites': arg}})
-        temp = db.find_one({'id':ctx.guild.id})
+        temp = db.find_one({'id': ctx.guild.id})
         await ctx.send(embed=print_website(temp['websites']))
     except Exception as error:
         await ctx.send("Some error occured")
         print(error)
         channel = client.get_channel(895030489121980416)
         await channel.send(error)
+
 
 @client.command()
 async def supported_website(ctx):
