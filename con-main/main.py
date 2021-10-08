@@ -95,10 +95,10 @@ async def roles():
         if not guild:
             print(data['id'])
             continue
-        if discord.utils.get(guild.roles, name="Contest Reminder"):
+        if discord.utils.get(guild.roles, name="Contest Remainder"):
             continue
         try:
-            await guild.create_role(name="Contest Reminder", colour=discord.Colour(0xff0000))
+            await guild.create_role(name="Contest Remainder", colour=discord.Colour(0xff0000))
         except:
             pass
 
@@ -152,14 +152,18 @@ async def fetch():
 
 @client.command()
 async def subscribe(ctx):
-    role = discord.utils.get(ctx.guild.roles, name="Contest Reminder")
+    role = discord.utils.get(ctx.guild.roles, name="Contest Remainder")
+    if not role:
+        await ctx.send('No role created please give the bot permission to create')
     user = ctx.message.author
     await user.add_roles(role)
 
 
 @client.command()
 async def unsubscribe(ctx):
-    role = discord.utils.get(ctx.guild.roles, name="Contest Reminder")
+    role = discord.utils.get(ctx.guild.roles, name="Contest Remainder")
+    if not role:
+        await ctx.send('No role created please give the bot permission to create')
     user = ctx.message.author
     await user.remove_roles(role)
 
@@ -290,4 +294,4 @@ async def change_channel(ctx):
 
 
 token = os.environ.get('Token')
-client.run(token)
+client.run('ODYwNzc5NjY5Mjg4Nzc5Nzc2.YOANiQ.Ull4a5JOERIwb6hOZhPfddFbw6w')
