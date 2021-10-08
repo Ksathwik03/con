@@ -107,7 +107,7 @@ async def reminder():
                     try:
                         await channel.send(embed=embed)
                     except Exception as error:
-                        channel = client.get_channel(636399538650742795)
+                        channel = client.get_channel(895030489121980416)
                         await channel.send(error)
                         error_db = Data_base.error_data_base()
                         error_db.insert_one({'error': {str(traceback.format_exc())}})
@@ -200,7 +200,7 @@ async def add_website(ctx, arg):
         await ctx.send(embed=print_website(temp['websites']))
     except Exception as error:
         await ctx.send("Some error occured")
-        channel = client.get_channel(636399538650742795)
+        channel = client.get_channel(895030489121980416)
         await channel.send(error)
 
 @client.command()
@@ -214,7 +214,7 @@ async def del_website(ctx, arg):
     except Exception as error:
         await ctx.send("Some error occured")
         print(error)
-        channel = client.get_channel(636399538650742795)
+        channel = client.get_channel(895030489121980416)
         await channel.send(error)
 
 @client.command()
@@ -247,7 +247,7 @@ async def change_channel(ctx):
         await ctx.send('You will all reminders in this channel')
     except Exception as error:
         await ctx.send("Some error occured")
-        channel = client.get_channel(636399538650742795)
+        channel = client.get_channel(895030489121980416)
         await channel.send(error)
 
 
