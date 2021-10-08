@@ -152,14 +152,14 @@ async def fetch():
 
 @client.command()
 async def subscribe(ctx):
-    role = discord.utils.get(ctx.guild.roles, name="Contest Remainder")
+    role = discord.utils.get(ctx.guild.roles, name="Contest Reminder")
     user = ctx.message.author
     await user.add_roles(role)
 
 
 @client.command()
 async def unsubscribe(ctx):
-    role = discord.utils.get(ctx.guild.roles, name="Contest Remainder")
+    role = discord.utils.get(ctx.guild.roles, name="Contest Reminder")
     user = ctx.message.author
     await user.remove_roles(role)
 
