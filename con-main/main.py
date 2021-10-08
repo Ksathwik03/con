@@ -89,15 +89,15 @@ async def channel_list():
 
 
 async def roles():
-    try:
-        Remainder_data = list(db.find({}))
-        for data in Remainder_data:
-            guild = client.get_guild(data['id'])
-            if discord.utils.get(guild.roles, name="Contest Reminder"):
-                continue
+    Remainder_data = list(db.find({}))
+    for data in Remainder_data:
+        guild = client.get_guild(data['id'])
+        if discord.utils.get(guild.roles, name="Contest Reminder"):
+            continue
+        try:
             await guild.create_role(name="Contest Reminder", colour=discord.Colour(0xff0000))
-    except:
-        pass
+        except:
+            pass
 
 
 async def reminder():
@@ -284,7 +284,6 @@ async def change_channel(ctx):
         await ctx.send("Some error occured")
         channel = client.get_channel(895030489121980416)
         await channel.send(error)
-
 
 
 token = os.environ.get('Token')
