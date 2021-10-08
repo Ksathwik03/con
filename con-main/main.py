@@ -294,4 +294,4 @@ async def change_channel(ctx):
 
 
 token = os.environ.get('Token')
-client.run('ODYwNzc5NjY5Mjg4Nzc5Nzc2.YOANiQ.Ull4a5JOERIwb6hOZhPfddFbw6w')
+client.run(token)
