@@ -92,6 +92,9 @@ async def roles():
     Remainder_data = list(db.find({}))
     for data in Remainder_data:
         guild = client.get_guild(data['id'])
+        if not guild:
+            print(data['id'])
+            continue
         if discord.utils.get(guild.roles, name="Contest Reminder"):
             continue
         try:
