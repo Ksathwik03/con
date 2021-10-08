@@ -152,9 +152,7 @@ async def upcoming(ctx, arg):
     global upcoming_data
     temp = db.find_one({'id': ctx.guild.id})
     if arg == 'subscribed' or arg == '':
-        temp = list(
-            filter(lambda x: temp[0]['websites'].count(x['resource']) >= 1,
-                   upcoming_data['objects']))
+        temp = list(filter(lambda x: temp['websites'].count(x['resource']) >= 1,upcoming_data['objects']))
     elif arg == 'all':
         temp = upcoming_data['objects']
     else:
