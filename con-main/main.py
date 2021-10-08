@@ -88,18 +88,14 @@ async def channel_list():
             })
 
 
-async def roles(id=0):
+async def roles():
     try:
-        if id:
-            guild = client.get_guild(id)
-            await guild.create_role(name="Contest Remainder")
-            return
         Remainder_data = list(db.find({}))
         for data in Remainder_data:
             guild = client.get_guild(data['id'])
-            if discord.utils.get(guild.roles, name="Contest Remainnder"):
+            if discord.utils.get(guild.roles, name="Contest Reminder"):
                 continue
-            await guild.create_role(name="Contest Remainder", colour=discord.Colour(0xff0000))
+            await guild.create_role(name="Contest Reminder", colour=discord.Colour(0xff0000))
     except:
         pass
 
@@ -114,7 +110,7 @@ async def reminder():
                 event = i['event']
                 url = i['href']
                 guild = client.get_guild(channel['id'])
-                moderator = discord.utils.get(guild.roles, name="Contest Remainder")
+                moderator = discord.utils.get(guild.roles, name="Contest Reminder")
                 embed = discord.Embed(
                     title=' Reminder!!',
                     description=
@@ -170,7 +166,7 @@ async def on_ready():
     print("Bot is ready")
     await client.change_presence(activity=discord.Game(
         name="Responding to %help"))
-    await roles();
+    await roles()
     await channel_list()
     await fetch()
 
@@ -217,7 +213,7 @@ async def on_guild_join(guild):
     })
     embed = main2.help_description()
     await channel.send(embed=embed)
-    await roles(id=guild.id)
+    await roles()
 
 
 @client.command()
